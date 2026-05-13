@@ -15,13 +15,13 @@ class AuthService implements AuthServiceInterface
         return cookie(
             'jwt_token',
             $token,
-            60,
-            '/',
-            null,
-            true,
-            true,
+            60,      // Minutes
+            '/',     // Path
+            null,    // Domain
+            true,    // Secure (Must be true for SameSite=None)
+            true,    // HttpOnly
             false,
-            'Lax'
+            'None'
         );
     }
 
@@ -55,7 +55,6 @@ class AuthService implements AuthServiceInterface
         ]);
 
         $credentials = $request->only('email', 'password');
-
         $token = JWTAuth::attempt($credentials);
 
         if (! $token) {

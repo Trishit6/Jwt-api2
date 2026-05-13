@@ -12,16 +12,15 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->alias([
-            'jwt.cookie' => JwtCookieMiddleware::class,
-        ]);
-
+    ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: [
             'jwt_token',
         ]);
+
+        $middleware->alias([
+            'jwt.cookie' => JwtCookieMiddleware::class,
+        ]);
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
-    })
-    ->create();
+    })->create();
