@@ -15,13 +15,13 @@ class AuthService implements AuthServiceInterface
         return cookie(
             'jwt_token',
             $token,
-            60,     // minutes
-            '/',    // path
-            null,   // domain
-            true,   // secure -> false on local http
-            true,   // httpOnly
-            false,  // raw
-            'Strict'
+            60,
+            '/',
+            null,
+            true,
+            true,
+            false,
+            'Lax'
         );
     }
 
@@ -66,14 +66,14 @@ class AuthService implements AuthServiceInterface
 
         return response()->json([
             'message' => 'Login successful',
-            'user' => JWTAuth::user(),
+            'user' => auth('api')->user(),
         ])->withCookie($this->jwtCookie($token));
     }
 
     public function profile()
     {
         return response()->json([
-            'user' => JWTAuth::user(),
+            'user' => auth('api')->user(),
         ]);
     }
 
