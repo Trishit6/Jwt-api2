@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -15,7 +15,6 @@ class User extends Authenticatable implements JWTSubject
 
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     public function getJWTIdentifier()

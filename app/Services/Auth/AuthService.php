@@ -6,74 +6,53 @@ use App\Interfaces\AuthServiceInterface;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use PHPOpenSourceSaver\JWTAuth\Facades\JWTAuth;
 
 class AuthService implements AuthServiceInterface
 {
-    private function jwtCookie(string $token)
-    {
-        return cookie(
-            'jwt_token',
-            $token,
-            60,      // Minutes
-            '/',     // Path
-            null,    // Domain
-            true,    // Secure (Must be true for SameSite=None)
-            true,    // HttpOnly
-            false,
-            'None'
-        );
-    }
-
     public function register(Request $request)
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'email' => 'required|string|email|unique:users,email',
-            'password' => 'required|string|min:6',
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
         ]);
 
         $token = JWTAuth::fromUser($user);
 
-        return response()->json([
-            'message' => 'User registered successfully',
+        return [
             'user' => $user,
-        ], 201)->withCookie($this->jwtCookie($token));
+            'token' => $token,
+        ];
     }
 
     public function login(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string|min:6',
+            'password' => 'required|string|min:8',
         ]);
 
-        $credentials = $request->only('email', 'password');
-        $token = JWTAuth::attempt($credentials);
+        if (! $token = JWTAuth::attempt($validated)) {
 
-        if (! $token) {
-            return response()->json([
-                'message' => 'Invalid credentials',
-            ], 401);
+            throw new \Exception('Invalid credentials');
         }
 
-        return response()->json([
-            'message' => 'Login successful',
+        return [
+            'token' => $token,
             'user' => auth('api')->user(),
-        ])->withCookie($this->jwtCookie($token));
+        ];
     }
 
     public function profile()
     {
-        return response()->json([
-            'user' => auth('api')->user(),
-        ]);
+        return auth('api')->user();
     }
 
     public function logout()
@@ -82,8 +61,6 @@ class AuthService implements AuthServiceInterface
             JWTAuth::invalidate($token);
         }
 
-        return response()->json([
-            'message' => 'Successfully logged out',
-        ])->withCookie(cookie()->forget('jwt_token'));
+        return true;
     }
 }

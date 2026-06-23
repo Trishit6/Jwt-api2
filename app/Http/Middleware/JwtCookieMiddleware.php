@@ -8,24 +8,18 @@ use Symfony\Component\HttpFoundation\Response;
 
 class JwtCookieMiddleware
 {
-    public function handle(Request $request, Closure $next): Response
-    {
-        \Log::info('JWT COOKIE MIDDLEWARE HIT');
+    public function handle(
+        Request $request,
+        Closure $next
+    ): Response {
 
         $token = $request->cookie('jwt_token');
 
-        \Log::info('JWT COOKIE VALUE', [
-            'jwt_token' => $token,
-        ]);
-
         if ($token) {
-            $request->headers->set('Authorization', 'Bearer '.$token);
-
-            \Log::info('AUTH HEADER SET', [
-                'authorization' => $request->header('Authorization'),
-            ]);
-        } else {
-            \Log::warning('NO JWT COOKIE FOUND');
+            $request->headers->set(
+                'Authorization',
+                'Bearer '.$token
+            );
         }
 
         return $next($request);
