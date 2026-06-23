@@ -22,7 +22,7 @@ class AuthController extends Controller
             true,
             true,
             false,
-            'None'
+            'None'// samesite
         );
     }
 
